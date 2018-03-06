@@ -22,7 +22,6 @@ class StorageDictionary : public ext::shared_ptr_helper<StorageDictionary>, publ
 public:
     std::string getName() const override { return "Dictionary"; }
     std::string getTableName() const override { return table_name; }
-    const NamesAndTypesList & getColumnsListImpl() const override { return columns; }
     BlockInputStreams read(const Names & column_names,
         const SelectQueryInfo & query_info,
         const Context & context,

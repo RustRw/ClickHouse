@@ -47,7 +47,6 @@ public:
     bool supportsFinal() const override { return true; }
     bool supportsPrewhere() const override { return true; }
 
-    const NamesAndTypesList & getColumnsListImpl() const override { return columns; }
     NameAndTypePair getColumn(const String & column_name) const override;
     bool hasColumn(const String & column_name) const override;
 

@@ -31,11 +31,6 @@ public:
         return table_name;
     }
 
-    const NamesAndTypesList & getColumnsListImpl() const override
-    {
-        return columns;
-    }
-
     BlockInputStreams read(
         const Names & column_names,
         const SelectQueryInfo & query_info,
@@ -61,7 +56,7 @@ protected:
     /** there are three options (ordered by priority):
     - use specified file descriptor if (fd >= 0)
     - use specified table_path if it isn't empty
-    - create own tabale inside data/db/table/
+    - create own table inside data/db/table/
     */
     StorageFile(
         const std::string & table_path_,

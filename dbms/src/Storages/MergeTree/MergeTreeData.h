@@ -306,8 +306,6 @@ public:
 
     Int64 getMaxDataPartIndex();
 
-    const NamesAndTypesList & getColumnsListImpl() const override { return columns; }
-
     NameAndTypePair getColumn(const String & column_name) const override
     {
         if (column_name == "_part")

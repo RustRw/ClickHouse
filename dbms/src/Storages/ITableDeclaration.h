@@ -28,19 +28,19 @@ public:
     /** Get a list of names and table column types, only non-virtual.
       */
     NamesAndTypesList getColumnsList() const;
-    const NamesAndTypesList & getColumnsListNonMaterialized() const { return getColumnsListImpl(); }
+    const NamesAndTypesList & getColumnsListNonMaterialized() const { return columns; }
 
     /** Get a list of column table names, only non-virtual.
       */
-    virtual Names getColumnNamesList() const;
+    Names getColumnNamesList() const;
 
     /** Get a description of the real (non-virtual) column by its name.
       */
-    virtual NameAndTypePair getRealColumn(const String & column_name) const;
+    NameAndTypePair getRealColumn(const String & column_name) const;
 
     /** Is there a real (non-virtual) column with that name.
       */
-    virtual bool hasRealColumn(const String & column_name) const;
+    bool hasRealColumn(const String & column_name) const;
 
     NameAndTypePair getMaterializedColumn(const String & column_name) const;
     bool hasMaterializedColumn(const String & column_name) const;
@@ -96,11 +96,6 @@ public:
     ColumnDefaults column_defaults;
 
 private:
-    virtual const NamesAndTypesList & getColumnsListImpl() const
-    {
-        return columns;
-    }
-
     using ColumnsListRange = boost::range::joined_range<const NamesAndTypesList, const NamesAndTypesList>;
     /// Returns a lazily joined range of table's ordinary and materialized columns, without unnecessary copying
     ColumnsListRange getColumnsListRange() const;

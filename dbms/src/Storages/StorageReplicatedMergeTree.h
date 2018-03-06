@@ -84,8 +84,6 @@ public:
     bool supportsPrewhere() const override { return data.supportsPrewhere(); }
     bool supportsReplication() const override { return true; }
 
-    const NamesAndTypesList & getColumnsListImpl() const override { return data.getColumnsListNonMaterialized(); }
-
     NameAndTypePair getColumn(const String & column_name) const override
     {
         return data.getColumn(column_name);

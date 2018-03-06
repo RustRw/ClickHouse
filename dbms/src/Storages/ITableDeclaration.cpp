@@ -33,7 +33,7 @@ NamesAndTypesList ITableDeclaration::getColumnsList() const
 
 ITableDeclaration::ColumnsListRange ITableDeclaration::getColumnsListRange() const
 {
-    return boost::join(getColumnsListImpl(), materialized_columns);
+    return boost::join(columns, materialized_columns);
 }
 
 
