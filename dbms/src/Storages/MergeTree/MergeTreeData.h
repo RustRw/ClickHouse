@@ -86,7 +86,7 @@ namespace ErrorCodes
 /// - MergeTreeDataWriter
 /// - MergeTreeDataMerger
 
-class MergeTreeData : public ITableDeclaration
+class MergeTreeData
 {
 public:
     /// Function to call if the part is suspected to contain corrupt data.
@@ -306,7 +306,7 @@ public:
 
     Int64 getMaxDataPartIndex();
 
-    NameAndTypePair getColumn(const String & column_name) const override
+    NameAndTypePair getColumn(const String & column_name) const
     {
         if (column_name == "_part")
             return NameAndTypePair("_part", std::make_shared<DataTypeString>());
@@ -315,12 +315,12 @@ public:
         if (column_name == "_sample_factor")
             return NameAndTypePair("_sample_factor", std::make_shared<DataTypeFloat64>());
 
-        return ITableDeclaration::getColumn(column_name);
+        return table_declaration.getColumn(column_name);
     }
 
-    bool hasColumn(const String & column_name) const override
+    bool hasColumn(const String & column_name) const
     {
-        return ITableDeclaration::hasColumn(column_name)
+        return table_declaration.hasColumn(column_name)
             || column_name == "_part"
             || column_name == "_part_index"
             || column_name == "_sample_factor";
@@ -328,7 +328,7 @@ public:
 
     String getDatabaseName() const { return database_name; }
 
-    String getTableName() const override { return table_name; }
+    String getTableName() const { return table_name; }
 
     String getFullPath() const { return full_path; }
 
@@ -431,7 +431,8 @@ public:
         bool skip_sanity_checks);
 
     /// Must be called with locked lockStructureForAlter().
-    void setColumnsList(const NamesAndTypesList & new_columns) { columns = new_columns; }
+    /// TODO:
+    /// void setTableDeclaration(const NamesAndTypesList & new_columns) { table_declaration.columns = new_columns; }
 
     /// Should be called if part data is suspected to be corrupted.
     void reportBrokenPart(const String & name)
@@ -505,6 +506,9 @@ public:
 
     /// For ATTACH/DETACH/DROP PARTITION.
     String getPartitionIDFromQuery(const ASTPtr & partition, const Context & context);
+
+
+    ITableDeclaration table_declaration;
 
     MergeTreeDataFormatVersion format_version;
 

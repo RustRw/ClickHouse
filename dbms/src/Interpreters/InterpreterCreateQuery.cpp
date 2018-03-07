@@ -366,7 +366,7 @@ InterpreterCreateQuery::ColumnsInfo InterpreterCreateQuery::setColumns(
     }
     else if (!create.as_table.empty())
     {
-        res.columns = as_storage->getColumnsListNonMaterialized();
+        res.columns = as_storage->columns;
         res.materialized_columns = as_storage->materialized_columns;
         res.alias_columns = as_storage->alias_columns;
         res.column_defaults = as_storage->column_defaults;

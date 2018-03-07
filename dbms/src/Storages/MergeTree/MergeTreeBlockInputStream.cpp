@@ -61,7 +61,7 @@ MergeTreeBlockInputStream::MergeTreeBlockInputStream(
 
     addTotalRowsApprox(total_rows);
 
-    header = storage.getSampleBlockForColumns(ordered_names);
+    header = storage.table_declaration.getSampleBlockForColumns(ordered_names);
 
     /// Types may be different during ALTER (when this stream is used to perform an ALTER).
     /// NOTE: We may use similar code to implement non blocking ALTERs.
@@ -137,12 +137,12 @@ try
         /// Under owned_data_part->columns_lock we check that all requested columns are of the same type as in the table.
         /// This may be not true in case of ALTER MODIFY.
         if (!pre_column_names.empty())
-            storage.check(data_part->columns, pre_column_names);
+            storage.table_declaration.check(data_part->columns, pre_column_names);
         if (!column_names.empty())
-            storage.check(data_part->columns, column_names);
+            storage.table_declaration.check(data_part->columns, column_names);
 
-        pre_columns = storage.getColumnsList().addTypes(pre_column_names);
-        columns = storage.getColumnsList().addTypes(column_names);
+        pre_columns = storage.table_declaration.getColumnsList().addTypes(pre_column_names);
+        columns = storage.table_declaration.getColumnsList().addTypes(column_names);
     }
     else
     {
@@ -156,7 +156,7 @@ try
     std::reverse(remaining_mark_ranges.begin(), remaining_mark_ranges.end());
 
     auto size_predictor = (preferred_block_size_bytes == 0) ? nullptr
-                          : std::make_unique<MergeTreeBlockSizePredictor>(data_part, ordered_names, data_part->storage.getSampleBlock());
+                          : std::make_unique<MergeTreeBlockSizePredictor>(data_part, ordered_names, data_part->storage.table_declaration.getSampleBlock());
 
     task = std::make_unique<MergeTreeReadTask>(data_part, remaining_mark_ranges, part_index_in_query, ordered_names,
                                                column_name_set, columns, pre_columns, remove_prewhere_column, should_reorder,

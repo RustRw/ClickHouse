@@ -119,7 +119,7 @@ MergeTreeReadTaskPtr MergeTreeReadPool::getTask(const size_t min_marks_to_read, 
 
 Block MergeTreeReadPool::getHeader() const
 {
-    return data.getSampleBlockForColumns(column_names);
+    return data.table_declaration.getSampleBlockForColumns(column_names);
 }
 
 
@@ -169,7 +169,7 @@ std::vector<size_t> MergeTreeReadPool::fillPerPartInfo(
     const bool check_columns)
 {
     std::vector<size_t> per_part_sum_marks;
-    Block sample_block = data.getSampleBlock();
+    Block sample_block = data.table_declaration.getSampleBlock();
 
     for (const auto i : ext::range(0, parts.size()))
     {
@@ -234,12 +234,12 @@ std::vector<size_t> MergeTreeReadPool::fillPerPartInfo(
                 *    This could be violated during ALTER MODIFY.
                 */
             if (!required_pre_column_names.empty())
-                data.check(part.data_part->columns, required_pre_column_names);
+                data.table_declaration.check(part.data_part->columns, required_pre_column_names);
             if (!required_column_names.empty())
-                data.check(part.data_part->columns, required_column_names);
+                data.table_declaration.check(part.data_part->columns, required_column_names);
 
-            per_part_pre_columns.push_back(data.getColumnsList().addTypes(required_pre_column_names));
-            per_part_columns.push_back(data.getColumnsList().addTypes(required_column_names));
+            per_part_pre_columns.push_back(data.table_declaration.getColumnsList().addTypes(required_pre_column_names));
+            per_part_columns.push_back(data.table_declaration.getColumnsList().addTypes(required_column_names));
         }
         else
         {

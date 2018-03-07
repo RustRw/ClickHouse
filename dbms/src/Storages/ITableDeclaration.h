@@ -21,10 +21,6 @@ class Context;
 class ITableDeclaration
 {
 public:
-    /** The name of the table.
-      */
-    virtual std::string getTableName() const = 0;
-
     /** Get a list of names and table column types, only non-virtual.
       */
     NamesAndTypesList getColumnsList() const;

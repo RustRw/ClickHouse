@@ -489,8 +489,8 @@ void StorageReplicatedMergeTree::createTableIfNotExists()
     ops.emplace_back(std::make_unique<zkutil::Op::Create>(zookeeper_path + "/metadata", metadata,
         acl, zkutil::CreateMode::Persistent));
     ops.emplace_back(std::make_unique<zkutil::Op::Create>(zookeeper_path + "/columns", ColumnsDescription<false>{
-        data.getColumnsListNonMaterialized(), data.materialized_columns,
-        data.alias_columns, data.column_defaults}.toString(),
+        data.table_declaration.columns, data.table_declaration.materialized_columns,
+        data.table_declaration.alias_columns, data.table_declaration.column_defaults}.toString(),
         acl, zkutil::CreateMode::Persistent));
     ops.emplace_back(std::make_unique<zkutil::Op::Create>(zookeeper_path + "/log", "",
         acl, zkutil::CreateMode::Persistent));
@@ -532,15 +532,15 @@ void StorageReplicatedMergeTree::checkTableStructure(bool skip_sanity_checks, bo
     auto & column_defaults = columns_desc.defaults;
     columns_version = stat.version;
 
-    if (columns != data.getColumnsListNonMaterialized() ||
-        materialized_columns != data.materialized_columns ||
-        alias_columns != data.alias_columns ||
-        column_defaults != data.column_defaults)
+    if (columns != data.table_declaration.columns ||
+        materialized_columns != data.table_declaration.materialized_columns ||
+        alias_columns != data.table_declaration.alias_columns ||
+        column_defaults != data.table_declaration.column_defaults)
     {
         if (allow_alter &&
             (skip_sanity_checks ||
-             data.getColumnsListNonMaterialized().sizeOfDifference(columns) +
-             data.materialized_columns.sizeOfDifference(materialized_columns) <= 2))
+             data.table_declaration.columns.sizeOfDifference(columns) +
+             data.table_declaration.materialized_columns.sizeOfDifference(materialized_columns) <= 2))
         {
             LOG_WARNING(log, "Table structure in ZooKeeper is a little different from local table structure. Assuming ALTER.");
 
@@ -549,10 +549,10 @@ void StorageReplicatedMergeTree::checkTableStructure(bool skip_sanity_checks, bo
                 context, table_name,
                 columns, materialized_columns, alias_columns, column_defaults, {});
 
-            data.setColumnsList(columns);
-            data.materialized_columns = std::move(materialized_columns);
-            data.alias_columns = std::move(alias_columns);
-            data.column_defaults = std::move(column_defaults);
+            data.table_declaration.columns = columns;
+            data.table_declaration.materialized_columns = std::move(materialized_columns);
+            data.table_declaration.alias_columns = std::move(alias_columns);
+            data.table_declaration.column_defaults = std::move(column_defaults);
         }
         else
         {
@@ -715,10 +715,10 @@ void StorageReplicatedMergeTree::createReplica()
     }
 
     zookeeper->create(replica_path + "/columns", ColumnsDescription<false>{
-            data.getColumnsListNonMaterialized(),
-            data.materialized_columns,
-            data.alias_columns,
-            data.column_defaults
+            data.table_declaration.columns,
+            data.table_declaration.materialized_columns,
+            data.table_declaration.alias_columns,
+            data.table_declaration.column_defaults
         }.toString(), zkutil::CreateMode::Persistent);
 }
 
@@ -1529,10 +1529,10 @@ void StorageReplicatedMergeTree::executeClearColumnInPartition(const LogEntry & 
     alter_command.type = AlterCommand::DROP_COLUMN;
     alter_command.column_name = entry.column_name;
 
-    auto new_columns = data.getColumnsListNonMaterialized();
-    auto new_materialized_columns = data.materialized_columns;
-    auto new_alias_columns = data.alias_columns;
-    auto new_column_defaults = data.column_defaults;
+    auto new_columns = data.table_declaration.columns;
+    auto new_materialized_columns = data.table_declaration.materialized_columns;
+    auto new_alias_columns = data.table_declaration.alias_columns;
+    auto new_column_defaults = data.table_declaration.column_defaults;
 
     alter_command.apply(new_columns, new_materialized_columns, new_alias_columns, new_column_defaults);
 
@@ -2573,10 +2573,10 @@ void StorageReplicatedMergeTree::alter(const AlterCommands & params,
             if (param.type == AlterCommand::MODIFY_PRIMARY_KEY)
                 throw Exception("Modification of primary key is not supported for replicated tables", ErrorCodes::NOT_IMPLEMENTED);
 
-        NamesAndTypesList new_columns = data.getColumnsListNonMaterialized();
-        NamesAndTypesList new_materialized_columns = data.materialized_columns;
-        NamesAndTypesList new_alias_columns = data.alias_columns;
-        ColumnDefaults new_column_defaults = data.column_defaults;
+        NamesAndTypesList new_columns = data.table_declaration.columns;
+        NamesAndTypesList new_materialized_columns = data.table_declaration.materialized_columns;
+        NamesAndTypesList new_alias_columns = data.table_declaration.alias_columns;
+        ColumnDefaults new_column_defaults = data.table_declaration.column_defaults;
         params.apply(new_columns, new_materialized_columns, new_alias_columns, new_column_defaults);
 
         new_columns_str = ColumnsDescription<false>{

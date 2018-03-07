@@ -92,10 +92,10 @@ void ReplicatedMergeTreeAlterThread::run()
 
                     auto table_lock = storage.lockStructureForAlter(__PRETTY_FUNCTION__);
 
-                    const auto columns_changed = columns != storage.data.getColumnsListNonMaterialized();
-                    const auto materialized_columns_changed = materialized_columns != storage.data.materialized_columns;
-                    const auto alias_columns_changed = alias_columns != storage.data.alias_columns;
-                    const auto column_defaults_changed = column_defaults != storage.data.column_defaults;
+                    const auto columns_changed = columns != storage.data.table_declaration.columns;
+                    const auto materialized_columns_changed = materialized_columns != storage.data.table_declaration.materialized_columns;
+                    const auto alias_columns_changed = alias_columns != storage.data.table_declaration.alias_columns;
+                    const auto column_defaults_changed = column_defaults != storage.data.table_declaration.column_defaults;
 
                     if (columns_changed || materialized_columns_changed || alias_columns_changed ||
                         column_defaults_changed)
@@ -108,25 +108,26 @@ void ReplicatedMergeTreeAlterThread::run()
 
                         if (columns_changed)
                         {
-                            storage.data.setColumnsList(columns);
+                            storage.columns = columns;
+                            storage.data.table_declaration.columns = std::move(columns);
                         }
 
                         if (materialized_columns_changed)
                         {
                             storage.materialized_columns = materialized_columns;
-                            storage.data.materialized_columns = std::move(materialized_columns);
+                            storage.data.table_declaration.materialized_columns = std::move(materialized_columns);
                         }
 
                         if (alias_columns_changed)
                         {
                             storage.alias_columns = alias_columns;
-                            storage.data.alias_columns = std::move(alias_columns);
+                            storage.data.table_declaration.alias_columns = std::move(alias_columns);
                         }
 
                         if (column_defaults_changed)
                         {
                             storage.column_defaults = column_defaults;
-                            storage.data.column_defaults = std::move(column_defaults);
+                            storage.data.table_declaration.column_defaults = std::move(column_defaults);
                         }
 
                         /// Reinitialize primary key because primary key column types might have changed.
@@ -158,7 +159,7 @@ void ReplicatedMergeTreeAlterThread::run()
                     if (!changed_version)
                         parts = storage.data.getDataParts();
 
-                    const auto columns_plus_materialized = storage.data.getColumnsList();
+                    const auto columns_plus_materialized = storage.data.table_declaration.getColumnsList();
 
                     for (const MergeTreeData::DataPartPtr & part : parts)
                     {

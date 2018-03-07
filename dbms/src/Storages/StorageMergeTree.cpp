@@ -161,10 +161,10 @@ void StorageMergeTree::alter(
 
     data.checkAlter(params);
 
-    auto new_columns = data.getColumnsListNonMaterialized();
-    auto new_materialized_columns = data.materialized_columns;
-    auto new_alias_columns = data.alias_columns;
-    auto new_column_defaults = data.column_defaults;
+    auto new_columns = data.table_declaration.columns;
+    auto new_materialized_columns = data.table_declaration.materialized_columns;
+    auto new_alias_columns = data.table_declaration.alias_columns;
+    auto new_column_defaults = data.table_declaration.column_defaults;
 
     params.apply(new_columns, new_materialized_columns, new_alias_columns, new_column_defaults);
 
@@ -225,10 +225,10 @@ void StorageMergeTree::alter(
     alias_columns = new_alias_columns;
     column_defaults = new_column_defaults;
 
-    data.setColumnsList(new_columns);
-    data.materialized_columns = std::move(new_materialized_columns);
-    data.alias_columns = std::move(new_alias_columns);
-    data.column_defaults = std::move(new_column_defaults);
+    data.table_declaration.columns = std::move(new_columns);
+    data.table_declaration.materialized_columns = std::move(new_materialized_columns);
+    data.table_declaration.alias_columns = std::move(new_alias_columns);
+    data.table_declaration.column_defaults = std::move(new_column_defaults);
 
     if (primary_key_is_modified)
     {
@@ -442,10 +442,10 @@ void StorageMergeTree::clearColumnInPartition(const ASTPtr & partition, const Fi
     alter_command.type = AlterCommand::DROP_COLUMN;
     alter_command.column_name = get<String>(column_name);
 
-    auto new_columns = data.getColumnsListNonMaterialized();
-    auto new_materialized_columns = data.materialized_columns;
-    auto new_alias_columns = data.alias_columns;
-    auto new_column_defaults = data.column_defaults;
+    auto new_columns = data.table_declaration.columns;
+    auto new_materialized_columns = data.table_declaration.materialized_columns;
+    auto new_alias_columns = data.table_declaration.alias_columns;
+    auto new_column_defaults = data.table_declaration.column_defaults;
 
     alter_command.apply(new_columns, new_materialized_columns, new_alias_columns, new_column_defaults);
 

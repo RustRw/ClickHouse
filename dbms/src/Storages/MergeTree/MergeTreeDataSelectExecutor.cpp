@@ -175,7 +175,7 @@ BlockInputStreams MergeTreeDataSelectExecutor::read(
         }
     }
 
-    NamesAndTypesList available_real_columns = data.getColumnsList();
+    NamesAndTypesList available_real_columns = data.table_declaration.getColumnsList();
 
     NamesAndTypesList available_real_and_virtual_columns = available_real_columns;
     for (const auto & name : virt_column_names)
@@ -192,7 +192,7 @@ BlockInputStreams MergeTreeDataSelectExecutor::read(
 
     std::multiset<String> part_values = VirtualColumnUtils::extractSingleValueFromBlock<String>(virtual_columns_block, "_part");
 
-    data.check(real_column_names);
+    data.table_declaration.check(real_column_names);
     processed_stage = QueryProcessingStage::FetchColumns;
 
     const Settings & settings = context.getSettingsRef();
@@ -856,7 +856,7 @@ void MergeTreeDataSelectExecutor::createPositiveSignCondition(
     arguments->children.push_back(sign);
     arguments->children.push_back(one);
 
-    out_expression = ExpressionAnalyzer(function, context, {}, data.getColumnsList()).getActions(false);
+    out_expression = ExpressionAnalyzer(function, context, {}, data.table_declaration.getColumnsList()).getActions(false);
     out_column = function->getColumnName();
 }
 

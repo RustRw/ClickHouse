@@ -105,7 +105,7 @@ public:
 
     std::string getPartPath() const;
 
-    Block getHeader() const override { return storage.getSampleBlock(); }
+    Block getHeader() const override { return storage.table_declaration.getSampleBlock(); }
 
     /// If the data is pre-sorted.
     void write(const Block & block) override;

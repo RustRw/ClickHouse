@@ -114,7 +114,7 @@ Block ITableDeclaration::getSampleBlockNonMaterialized() const
 {
     Block res;
 
-    for (const auto & col : getColumnsListNonMaterialized())
+    for (const auto & col : columns)
         res.insert({ col.type->createColumn(), col.type, col.name });
 
     return res;
